@@ -1,0 +1,7 @@
+# Python
+BE/__pycache__/
+BE/*.pyc
+BE/myenv/
+
+# macOS junk
+.DS_Store

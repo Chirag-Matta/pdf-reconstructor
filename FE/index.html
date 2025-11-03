@@ -1,0 +1,63 @@
+<!-- frontend/index.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Reconstruct Jumbled PDF - Upload</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 24px; max-width: 800px; margin: auto; }
+    .drop { padding: 32px; border: 2px dashed #aaa; text-align:center; margin-bottom: 12px; }
+    button { padding: 8px 16px; border-radius:6px; }
+    pre { background:#f9f9f9; padding:12px; border-radius:6px; }
+  </style>
+</head>
+<body>
+  <h1>Reconstruct Jumbled PDF</h1>
+  <div class="drop">
+    <input id="file" type="file" accept="application/pdf" />
+    <div style="margin-top:8px;">
+      <button id="uploadBtn">Upload & Reconstruct</button>
+    </div>
+  </div>
+  <div id="status"></div>
+  <pre id="meta" style="display:none"></pre>
+
+<script>
+  document.getElementById('uploadBtn').onclick = async () => {
+    const f = document.getElementById('file').files[0];
+    if (!f) return alert('Select a PDF first');
+    document.getElementById('status').innerText = 'Uploading...';
+    const form = new FormData();
+    form.append('file', f);
+    try {
+      const res = await fetch('http://localhost:8000/reconstruct', {
+        method: 'POST',
+        body: form
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        alert('Server error: ' + text);
+        return;
+      }
+      // read metadata from header if present
+      const meta = res.headers.get('X-Result-Meta');
+      if (meta) {
+        document.getElementById('meta').style.display = 'block';
+        document.getElementById('meta').innerText = meta;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'reordered.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      document.getElementById('status').innerText = 'Done. Download should start.';
+    } catch (e) {
+      alert('Upload failed: ' + e);
+    }
+  }
+</script>
+</body>
+</html>
