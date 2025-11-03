@@ -31,7 +31,7 @@ class Orchestrator:
         if api_key:
             try:
                 genai.configure(api_key=api_key)
-                self.gemini_model = genai.GenerativeModel('all-MiniLM-L6-v2')
+                self.gemini_model = genai.GenerativeModel('gemini-2.5-flash')
                 print("[green]Gemini client initialized[/green]")
             except Exception as e:
                 print(f"[red]Gemini initialization failed: {e}[/red]")
