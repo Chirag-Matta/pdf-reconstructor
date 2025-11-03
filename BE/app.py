@@ -75,6 +75,15 @@ async def reconstruct_pdf(file: UploadFile = File(...)):
         "confidences": final_confidences,
         "summaries": page_summaries
     }
+    
+    with open("ordering_debug.json", "w") as f:
+        json.dump({
+            "initial_order": initial_order,
+            "final_order": final_order,
+            "confidences": confidences
+        }, f, indent=2)
+
+
 
     # Write log JSON alongside tmp PDF
     log_tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w")
