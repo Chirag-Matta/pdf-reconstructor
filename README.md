@@ -506,7 +506,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For support, email your.email@example.com or open an issue in the GitHub repository.
+For support, email mattachirag980@gmail.com or open an issue in the GitHub repository.
 
 ---
 
@@ -517,14 +517,6 @@ For support, email your.email@example.com or open an issue in the GitHub reposit
 **Current Version:** 1.0.0
 
 **Last Updated:** November 2025
-
----
-
-## 🔗 Links
-
-- **Documentation**: [GitHub Wiki](https://github.com/yourusername/pdf-reconstructor/wiki)
-- **Issue Tracker**: [GitHub Issues](https://github.com/yourusername/pdf-reconstructor/issues)
-- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
 
 ---
 
