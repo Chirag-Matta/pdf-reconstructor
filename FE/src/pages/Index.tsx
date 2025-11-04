@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { TerminalLogs } from "@/components/TerminalLogs";
 
 const Index: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -8,6 +9,7 @@ const Index: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [originalPdfUrl, setOriginalPdfUrl] = useState<string | null>(null);
   const [reconstructedPdfUrl, setReconstructedPdfUrl] = useState<string | null>(null);
+  const [backendLogs, setBackendLogs] = useState<string[]>([]);
 
   useEffect(() => {
     return () => {
@@ -24,7 +26,8 @@ const Index: React.FC = () => {
     const selectedFile = e.target.files?.[0] || null;
     setFile(selectedFile);
     setError(null);
-    setReconstructedPdfUrl(null); // Clear previous result
+    setReconstructedPdfUrl(null);
+    setBackendLogs([]); // Clear logs
     if (selectedFile) {
       setOriginalPdfUrl(URL.createObjectURL(selectedFile));
     } else {
@@ -46,6 +49,11 @@ const Index: React.FC = () => {
       setProgress(0);
       setError(null);
       setReconstructedPdfUrl(null);
+      setBackendLogs([]); // Clear previous logs
+
+      // Add frontend log
+      setBackendLogs(prev => [...prev, "🚀 Starting PDF reconstruction..."]);
+      setBackendLogs(prev => [...prev, `📄 Uploading file: ${file.name}`]);
 
       const response = await axios.post("http://127.0.0.1:8000/reconstruct", formData, {
         headers: {
@@ -60,12 +68,27 @@ const Index: React.FC = () => {
         },
       });
 
+      // Extract backend logs from response headers
+      const logsHeader = response.headers['x-backend-logs'];
+      if (logsHeader) {
+        try {
+          const decodedLogs = JSON.parse(decodeURIComponent(logsHeader));
+          setBackendLogs(prev => [...prev, "📡 Received backend logs:", ...decodedLogs]);
+        } catch (err) {
+          console.error("Failed to parse backend logs:", err);
+          setBackendLogs(prev => [...prev, "⚠️ Could not parse backend logs"]);
+        }
+      }
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       setReconstructedPdfUrl(url);
+      setBackendLogs(prev => [...prev, "✅ PDF reconstruction complete!"]);
 
     } catch (err: unknown) {
       console.error(err);
-      setError("Upload failed. Please check the backend connection or file format.");
+      const errorMsg = "Upload failed. Please check the backend connection or file format.";
+      setError(errorMsg);
+      setBackendLogs(prev => [...prev, `❌ ${errorMsg}`]);
     } finally {
       setLoading(false);
       setProgress(0);
@@ -74,14 +97,14 @@ const Index: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="bg-white shadow-lg rounded-2xl p-8 max-w-md w-full text-center mx-auto">
+      <div className="bg-white shadow-lg rounded-2xl p-8 max-w-md w-full text-center mx-auto mb-8">
         <h1 className="text-2xl font-bold mb-4 text-gray-800">📄 Loan Agreement Reconstructor</h1>
 
         <input
           type="file"
           accept="application/pdf"
           onChange={handleFileChange}
-          className="block w-full text-sm text-gray-500 mb-4"
+          className="block w-full text-sm text-gray-500 mb-4 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
         />
 
         {file && (
@@ -114,6 +137,14 @@ const Index: React.FC = () => {
         </button>
       </div>
 
+      {/* Terminal Logs */}
+      {backendLogs.length > 0 && (
+        <div className="max-w-7xl mx-auto mb-8">
+          <TerminalLogs logs={backendLogs} isProcessing={loading} />
+        </div>
+      )}
+
+      {/* PDF Viewers */}
       {(originalPdfUrl || reconstructedPdfUrl) && (
         <div className="mt-8 w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
@@ -121,7 +152,7 @@ const Index: React.FC = () => {
             {originalPdfUrl ? (
               <iframe src={originalPdfUrl} className="w-full h-[80vh] border rounded-lg" title="Original PDF" />
             ) : (
-               <div className="w-full h-[80vh] border rounded-lg flex items-center justify-center bg-gray-50">
+              <div className="w-full h-[80vh] border rounded-lg flex items-center justify-center bg-gray-50">
                 <p className="text-gray-500">No original PDF selected</p>
               </div>
             )}
