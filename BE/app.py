@@ -28,6 +28,14 @@ app.add_middleware(
     expose_headers=["X-Result-Meta"],
 )
 
+# Store logs for this request
+request_logs = []
+
+def log(message: str):
+    """Add a log entry"""
+    print(message)  # Still print to terminal
+    request_logs.append(message)
+
 orchestrator = Orchestrator()
 
 @app.post("/reconstruct")

@@ -1,24 +1,455 @@
+<!-- frontend/index.html -->
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PDF Reorderer - AI-Powered Document Organization</title>
-    <meta name="description" content="Automatically reorder shuffled PDF pages using AI-powered analysis and multiple intelligent strategies" />
-    <meta name="author" content="PDF Reorderer" />
-
-    <meta property="og:title" content="PDF Reorderer - AI-Powered Document Organization" />
-    <meta property="og:description" content="Automatically reorder shuffled PDF pages using AI-powered analysis and multiple intelligent strategies" />
-    <meta property="og:type" content="website" />
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Reconstruct Jumbled PDF - Upload</title>
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      padding: 24px; 
+      max-width: 1000px; 
+      margin: auto;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 { 
+      color: #667eea; 
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 24px;
+    }
+    .drop { 
+      padding: 32px; 
+      border: 2px dashed #667eea; 
+      background: #f8f9ff;
+      text-align: center; 
+      margin-bottom: 20px;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+    .drop:hover {
+      border-color: #764ba2;
+      background: #f0f2ff;
+    }
+    button { 
+      padding: 12px 24px; 
+      border-radius: 6px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    pre { 
+      background: #f9f9f9; 
+      padding: 16px; 
+      border-radius: 6px;
+      border-left: 4px solid #667eea;
+      overflow-x: auto;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .save-options {
+      margin: 20px 0;
+      padding: 20px;
+      background: #f8f9ff;
+      border-radius: 8px;
+      border: 1px solid #e0e7ff;
+    }
+    .save-options h3 {
+      margin-top: 0;
+      color: #667eea;
+      font-size: 18px;
+    }
+    .radio-group {
+      margin: 12px 0;
+    }
+    .radio-group label {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 24px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .radio-group input[type="radio"] {
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    #customPath {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #e0e7ff;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-top: 8px;
+      font-family: 'Courier New', monospace;
+      transition: border-color 0.3s;
+    }
+    #customPath:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .path-hint {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    .logs-container {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 24px;
+      max-height: 500px;
+      overflow-y: auto;
+      font-family: 'Courier New', Monaco, monospace;
+      font-size: 13px;
+      display: none;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    }
+    .logs-container.visible {
+      display: block;
+    }
+    .logs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #444;
+      font-weight: bold;
+    }
+    .clear-logs {
+      background: #444;
+      color: #fff;
+      border: none;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .clear-logs:hover {
+      background: #555;
+    }
+    .log-entry {
+      margin: 6px 0;
+      padding: 4px 0;
+      line-height: 1.5;
+    }
+    .log-info { color: #4ec9b0; }
+    .log-error { color: #f48771; }
+    .log-success { color: #b5cea8; }
+    .log-warning { color: #ce9178; }
+    .status-box {
+      margin: 16px 0;
+      padding: 16px;
+      border-radius: 6px;
+      display: none;
+      font-weight: 500;
+    }
+    .status-box.visible { display: block; }
+    .status-box.processing {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      color: #856404;
+    }
+    .status-box.success {
+      background: #d4edda;
+      border: 1px solid #28a745;
+      color: #155724;
+    }
+    .status-box.error {
+      background: #f8d7da;
+      border: 1px solid #dc3545;
+      color: #721c24;
+    }
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+    #file {
+      font-size: 14px;
+      padding: 8px;
+    }
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔄 PDF Page Reconstructor</h1>
+    <p class="subtitle">Automatically reorder shuffled PDF pages using AI</p>
     
+    <div class="drop">
+      <div class="file-input-wrapper">
+        <input id="file" type="file" accept="application/pdf" />
+      </div>
+      <div style="margin-top: 16px;">
+        <button id="uploadBtn">
+          <span id="btnText">🚀 Upload & Reconstruct</span>
+        </button>
+      </div>
+    </div>
 
-    <meta name="twitter:card" content="summary_large_image" />
-    
-    
-  </head>
+    <div class="save-options">
+      <h3>💾 Save Options</h3>
+      <div class="radio-group">
+        <label>
+          <input type="radio" name="saveMode" value="download" checked> 
+          📥 Download to Browser
+        </label>
+        <label>
+          <input type="radio" name="saveMode" value="custom"> 
+          📂 Save to Custom Location
+        </label>
+      </div>
+      <div id="customPathWrapper" style="display: none;">
+        <input 
+          id="customPath" 
+          type="text" 
+          placeholder="e.g., /home/user/Documents/reordered.pdf or C:\Users\Name\Documents\reordered.pdf"
+        />
+        <div class="path-hint">
+          💡 Enter the full path where you want to save the file (including filename)
+        </div>
+      </div>
+    </div>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <div id="status" class="status-box"></div>
+    <pre id="meta" style="display:none"></pre>
+
+    <div class="logs-container" id="logsContainer">
+      <div class="logs-header">
+        <span>📋 Processing Logs</span>
+        <button class="clear-logs" id="clearLogs">Clear Logs</button>
+      </div>
+      <div id="logs"></div>
+    </div>
+  </div>
+
+<script>
+  const logsContainer = document.getElementById('logsContainer');
+  const logsDiv = document.getElementById('logs');
+  const statusBox = document.getElementById('status');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const btnText = document.getElementById('btnText');
+  
+  // Show/hide custom path input based on radio selection
+  document.querySelectorAll('input[name="saveMode"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      document.getElementById('customPathWrapper').style.display = 
+        e.target.value === 'custom' ? 'block' : 'none';
+    });
+  });
+
+  // Clear logs button
+  document.getElementById('clearLogs').onclick = () => {
+    logsDiv.innerHTML = '';
+  };
+
+  function showStatus(message, type) {
+    statusBox.className = `status-box visible ${type}`;
+    statusBox.textContent = message;
+  }
+
+  function addLog(message, type = 'info') {
+    const entry = document.createElement('div');
+    entry.className = `log-entry log-${type}`;
+    const timestamp = new Date().toLocaleTimeString();
+    entry.textContent = `[${timestamp}] ${message}`;
+    logsDiv.appendChild(entry);
+    logsContainer.scrollTop = logsContainer.scrollHeight;
+  }
+
+  document.getElementById('uploadBtn').onclick = async () => {
+    const f = document.getElementById('file').files[0];
+    if (!f) {
+      alert('⚠️ Please select a PDF file first');
+      return;
+    }
+    
+    const saveMode = document.querySelector('input[name="saveMode"]:checked').value;
+    const customPath = document.getElementById('customPath').value.trim();
+    
+    if (saveMode === 'custom' && !customPath) {
+      alert('⚠️ Please enter a custom save path');
+      document.getElementById('customPath').focus();
+      return;
+    }
+
+    // Clear previous logs and show container
+    logsDiv.innerHTML = '';
+    logsContainer.classList.add('visible');
+    
+    // Disable button and show processing state
+    uploadBtn.disabled = true;
+    btnText.innerHTML = '⏳ Processing... <span class="spinner"></span>';
+    showStatus('⏳ Processing your PDF...', 'processing');
+    
+    addLog('🚀 Starting PDF reconstruction process...', 'info');
+    addLog(`📄 File: ${f.name} (${(f.size / 1024).toFixed(2)} KB)`, 'info');
+    
+    const form = new FormData();
+    form.append('file', f);
+    
+    // Add save path if custom mode
+    if (saveMode === 'custom') {
+      form.append('save_path', customPath);
+      addLog(`💾 Target location: ${customPath}`, 'info');
+    }
+    
+    try {
+      addLog('📤 Uploading to server...', 'info');
+      
+      const res = await fetch('http://localhost:8000/reconstruct', {
+        method: 'POST',
+        body: form
+      });
+      
+      if (!res.ok) {
+        const text = await res.text();
+        addLog(`❌ Server error: ${text}`, 'error');
+        showStatus(`❌ Error: ${text}`, 'error');
+        return;
+      }
+      
+      addLog('✅ Server processing complete!', 'success');
+      
+      // Read metadata from header if present
+      const meta = res.headers.get('X-Result-Meta');
+      if (meta) {
+        const metadata = JSON.parse(meta);
+        document.getElementById('meta').style.display = 'block';
+        document.getElementById('meta').innerText = JSON.stringify(metadata, null, 2);
+        
+        addLog(`📊 Pages processed: ${metadata.page_count}`, 'info');
+        addLog(`🤖 LLM refinement: ${metadata.llm_used ? 'Yes' : 'No'}`, 'info');
+        addLog(`📈 Average confidence: ${(metadata.avg_confidence * 100).toFixed(1)}%`, 'info');
+      }
+      
+      // Read backend logs from header if present
+      const backendLogs = res.headers.get('X-Backend-Logs');
+      if (backendLogs) {
+        try {
+          const logs = JSON.parse(decodeURIComponent(backendLogs));
+          logs.forEach(log => {
+            // Determine log type from message content
+            let logType = 'info';
+            if (log.includes('❌') || log.includes('failed')) logType = 'error';
+            else if (log.includes('✅') || log.includes('success')) logType = 'success';
+            else if (log.includes('⚠️') || log.includes('skipped')) logType = 'warning';
+            
+            addLog(`[Backend] ${log}`, logType);
+          });
+        } catch (e) {
+          console.error('Failed to parse backend logs:', e);
+        }
+      }
+
+      if (saveMode === 'custom') {
+        // File saved on server
+        const result = await res.json();
+        addLog(`✅ File saved successfully!`, 'success');
+        addLog(`📍 Location: ${result.saved_path}`, 'success');
+        if (result.metadata_path) {
+          addLog(`📄 Metadata: ${result.metadata_path}`, 'info');
+        }
+        showStatus(`✅ Success! File saved to: ${result.saved_path}`, 'success');
+      } else {
+        // Download in browser
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'reordered.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        
+        addLog('📥 Download started', 'success');
+        showStatus('✅ Success! Your download should start automatically.', 'success');
+      }
+      
+    } catch (e) {
+      addLog(`❌ Upload failed: ${e.message}`, 'error');
+      showStatus(`❌ Upload failed: ${e.message}`, 'error');
+      alert('❌ Upload failed: ' + e.message);
+    } finally {
+      uploadBtn.disabled = false;
+      btnText.innerHTML = '🚀 Upload & Reconstruct';
+    }
+  }
+
+  // Drag and drop support
+  const dropArea = document.querySelector('.drop');
+  
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, preventDefaults, false);
+  });
+  
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropArea.addEventListener(eventName, () => {
+      dropArea.style.borderColor = '#764ba2';
+      dropArea.style.background = '#f0f2ff';
+    }, false);
+  });
+  
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, () => {
+      dropArea.style.borderColor = '#667eea';
+      dropArea.style.background = '#f8f9ff';
+    }, false);
+  });
+  
+  dropArea.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    document.getElementById('file').files = files;
+  }, false);
+</script>
+</body>
 </html>
+Apollo
