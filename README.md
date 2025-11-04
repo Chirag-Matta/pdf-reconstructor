@@ -218,8 +218,7 @@ http://localhost:8080
 1. **Upload PDF**: Click "Select PDF File" or drag-and-drop a shuffled PDF
 2. **Process**: Click "Upload & Reconstruct"
 3. **View Results**: 
-   - Original PDF displayed on the left
-   - Reconstructed PDF displayed on the right
+   - Metadata Summary: Displays structured JSON output containing key details such as confidence scores, final order.
    - Processing logs shown in terminal-style output
 4. **Download**: The reconstructed PDF is automatically downloaded
 
